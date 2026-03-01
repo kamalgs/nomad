@@ -24,6 +24,16 @@ client {
     path      = "/opt/nomad/launcher"
     read_only = false
   }
+
+  host_volume "jupyter_data" {
+    path      = "/opt/nomad/volumes/jupyter_data"
+    read_only = false
+  }
+
+  host_volume "o3000y_data" {
+    path      = "/opt/nomad/volumes/o3000y_data"
+    read_only = false
+  }
 }
 
 plugin "docker" {

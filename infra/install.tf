@@ -4,29 +4,29 @@ resource "terraform_data" "nomad_install" {
   provisioner "local-exec" {
     command = <<-EOT
       set -e
+
+      # Install Docker
+      apt-get update && apt-get install -y docker.io
+      systemctl enable docker && systemctl start docker
+
+      # Install Nomad
       tmp=$(mktemp -d)
       curl -fsSL "https://releases.hashicorp.com/nomad/${var.nomad_version}/nomad_${var.nomad_version}_linux_amd64.zip" -o "$tmp/nomad.zip"
       unzip -o "$tmp/nomad.zip" -d "${var.install_dir}"
       chmod +x "${var.install_dir}/nomad"
       rm -rf "$tmp"
-      mkdir -p "${var.data_dir}" "${var.config_dir}" "/opt/nomad/volumes/caddy_data" "/opt/nomad/caddy/apps" "/opt/nomad/launcher"
+      mkdir -p "${var.data_dir}" "${var.config_dir}" "/opt/nomad/volumes/caddy_data" "/opt/nomad/volumes/jupyter_data" "/opt/nomad/volumes/o3000y_data" "/opt/nomad/caddy/apps" "/opt/nomad/launcher"
 
-      # Seed initial Caddy route snippets for existing apps
-      cat > /opt/nomad/caddy/apps/dev.caddy << 'CADDY'
-dev.gkamal.online {
-    reverse_proxy localhost:3000
-}
-CADDY
-
-      cat > /opt/nomad/caddy/apps/o3000ly.caddy << 'CADDY'
-o3000ly.gkamal.online {
+      # Seed initial Caddy route snippets
+      cat > /opt/nomad/caddy/apps/o3000y.caddy << 'CADDY'
+o3000y.gkamal.online {
     reverse_proxy localhost:8080
 }
 CADDY
 
       cat > /opt/nomad/caddy/apps/alphaa.caddy << 'CADDY'
 alphaa.gkamal.online {
-    reverse_proxy 127.0.0.1:8000
+    reverse_proxy localhost:8000
 }
 CADDY
 
@@ -42,8 +42,10 @@ jupyter.gkamal.online {
 }
 CADDY
 
-      # Seed launcher apps config with jupyter as on-demand
-      test -f /opt/nomad/launcher/apps.json || echo '{"jupyter.gkamal.online": {"job": "jupyter", "group": "jupyter", "port": 4180, "idle_timeout": 900}}' > /opt/nomad/launcher/apps.json
+      # Seed launcher apps config with on-demand apps
+      test -f /opt/nomad/launcher/apps.json || cat > /opt/nomad/launcher/apps.json << 'JSON'
+{"jupyter.gkamal.online": {"job": "jupyter", "group": "jupyter", "port": 4180, "idle_timeout": 900}, "o3000y.gkamal.online": {"job": "o3000y", "group": "app", "port": 8080, "idle_timeout": 900}, "alphaa.gkamal.online": {"job": "alphaa", "group": "app", "port": 8000, "idle_timeout": 900}}
+JSON
     EOT
   }
 }

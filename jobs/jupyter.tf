@@ -11,17 +11,33 @@ resource "nomad_job" "jupyter" {
           mode = "host"
         }
 
+        volume "jupyter_data" {
+          type      = "host"
+          source    = "jupyter_data"
+          read_only = false
+        }
+
         task "jupyter" {
-          driver = "raw_exec"
-          user   = "agent"
+          driver = "docker"
 
           config {
-            command = "/home/agent/.local/share/mise/installs/python/3.12.12/bin/jupyter-lab"
-            args    = ["--config=/home/agent/.jupyter/jupyter_lab_config.py"]
+            image        = "jupyter/base-notebook:latest"
+            network_mode = "host"
+            args = [
+              "jupyter-lab",
+              "--ip=127.0.0.1", "--port=8888", "--no-browser",
+              "--ServerApp.token=''", "--ServerApp.password=''",
+              "--ServerApp.allow_remote_access=True",
+              "--ServerApp.allow_origin='*'",
+              "--ServerApp.disable_check_xsrf=True",
+              "--ServerApp.websocket_compression=False",
+              "--notebook-dir=/home/jovyan/notebooks",
+            ]
           }
 
-          env {
-            PATH = "/home/agent/.local/share/mise/installs/python/3.12.12/bin:/usr/local/bin:/usr/bin:/bin"
+          volume_mount {
+            volume      = "jupyter_data"
+            destination = "/home/jovyan/notebooks"
           }
 
           resources {
@@ -31,11 +47,32 @@ resource "nomad_job" "jupyter" {
         }
 
         task "oauth2-proxy" {
-          driver = "raw_exec"
+          driver = "docker"
 
           config {
-            command = "/usr/local/bin/oauth2-proxy"
-            args    = ["--config=/etc/oauth2-proxy/oauth2-proxy.cfg"]
+            image        = "quay.io/oauth2-proxy/oauth2-proxy:latest"
+            network_mode = "host"
+            args         = ["--config=/local/oauth2-proxy.cfg"]
+          }
+
+          template {
+            data        = <<-CFG
+            http_address = "127.0.0.1:4180"
+            upstreams = ["http://127.0.0.1:8888"]
+            provider = "github"
+            client_id = "${var.oauth_client_id}"
+            client_secret = "${var.oauth_client_secret}"
+            cookie_secret = "${var.oauth_cookie_secret}"
+            cookie_secure = true
+            cookie_name = "_oauth2_proxy"
+            github_users = ["${var.oauth_github_user}"]
+            email_domains = ["*"]
+            reverse_proxy = true
+            set_xauthrequest = true
+            proxy_websockets = true
+            redirect_url = "https://jupyter.${var.domain}/oauth2/callback"
+            CFG
+            destination = "local/oauth2-proxy.cfg"
           }
 
           resources {
