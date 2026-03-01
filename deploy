@@ -6,6 +6,7 @@ CADDY_APPS="/opt/nomad/caddy/apps"
 LAUNCHER_APPS="/opt/nomad/launcher/apps.json"
 DEFAULT_CPU=256
 DEFAULT_MEMORY=512
+DEFAULT_IDLE_TIMEOUT=900
 
 usage() {
   cat <<EOF
@@ -16,6 +17,7 @@ Usage:
 
 Options:
   --ondemand       Scale-to-zero app (woken by launcher)
+  --idle-timeout N Idle seconds before scale-down (default: $DEFAULT_IDLE_TIMEOUT)
   --cpu N          CPU shares (default: $DEFAULT_CPU)
   --memory N       Memory in MB (default: $DEFAULT_MEMORY)
   -e KEY=VALUE     Environment variable (repeatable)
@@ -34,29 +36,30 @@ reload_caddy() {
 }
 
 update_launcher_config() {
-  local action="$1" name="$2" port="${3:-}"
+  local action="$1" name="$2" port="${3:-}" idle_timeout="${4:-}"
   local host="${name}.${DOMAIN}"
 
   python3 -c "
 import json, sys
-action, host, name, port = sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4]
+action, host, name = sys.argv[1], sys.argv[2], sys.argv[3]
+port, idle_timeout = int(sys.argv[4]) if sys.argv[4] else 0, int(sys.argv[5]) if sys.argv[5] else 0
 try:
     with open('$LAUNCHER_APPS') as f:
         apps = json.load(f)
 except (FileNotFoundError, json.JSONDecodeError):
     apps = {}
 if action == 'add':
-    apps[host] = {'job': name, 'group': name}
+    apps[host] = {'job': name, 'group': name, 'port': port, 'idle_timeout': idle_timeout}
 elif action == 'remove':
     apps.pop(host, None)
 with open('$LAUNCHER_APPS', 'w') as f:
     json.dump(apps, f, indent=2)
-" "$action" "$host" "$name" "$port"
+" "$action" "$host" "$name" "$port" "$idle_timeout"
 }
 
 deploy_app() {
-  local name="$1" image="$2" port="$3" ondemand="$4" cpu="$5" memory="$6"
-  shift 6
+  local name="$1" image="$2" port="$3" ondemand="$4" cpu="$5" memory="$6" idle_timeout="$7"
+  shift 7
   local env_vars=("$@")
 
   local count=1
@@ -121,7 +124,7 @@ ${host} {
     }
 }
 CADDY
-    update_launcher_config add "$name" "$port"
+    update_launcher_config add "$name" "$port" "$idle_timeout"
   else
     cat > "${CADDY_APPS}/${name}.caddy" <<CADDY
 ${host} {
@@ -147,7 +150,7 @@ remove_app() {
   rm -f "${CADDY_APPS}/${name}.caddy"
 
   echo "Updating launcher config..."
-  update_launcher_config remove "$name" ""
+  update_launcher_config remove "$name" "" ""
 
   echo "Reloading Caddy..."
   reload_caddy
@@ -219,6 +222,7 @@ shift 3
 ONDEMAND="false"
 CPU="$DEFAULT_CPU"
 MEMORY="$DEFAULT_MEMORY"
+IDLE_TIMEOUT="$DEFAULT_IDLE_TIMEOUT"
 ENV_VARS=()
 
 while [[ $# -gt 0 ]]; do
@@ -226,6 +230,10 @@ while [[ $# -gt 0 ]]; do
     --ondemand)
       ONDEMAND="true"
       shift
+      ;;
+    --idle-timeout)
+      IDLE_TIMEOUT="$2"
+      shift 2
       ;;
     --cpu)
       CPU="$2"
@@ -246,4 +254,4 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-deploy_app "$NAME" "$IMAGE" "$PORT" "$ONDEMAND" "$CPU" "$MEMORY" "${ENV_VARS[@]+"${ENV_VARS[@]}"}"
+deploy_app "$NAME" "$IMAGE" "$PORT" "$ONDEMAND" "$CPU" "$MEMORY" "$IDLE_TIMEOUT" "${ENV_VARS[@]+"${ENV_VARS[@]}"}"

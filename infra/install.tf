@@ -43,7 +43,7 @@ jupyter.gkamal.online {
 CADDY
 
       # Seed launcher apps config with jupyter as on-demand
-      test -f /opt/nomad/launcher/apps.json || echo '{"jupyter.gkamal.online": {"job": "jupyter", "group": "jupyter"}}' > /opt/nomad/launcher/apps.json
+      test -f /opt/nomad/launcher/apps.json || echo '{"jupyter.gkamal.online": {"job": "jupyter", "group": "jupyter", "port": 4180, "idle_timeout": 900}}' > /opt/nomad/launcher/apps.json
     EOT
   }
 }

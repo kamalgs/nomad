@@ -26,11 +26,15 @@ resource "nomad_job" "launcher" {
             #!/usr/bin/env python3
             import http.server
             import json
+            import subprocess
+            import threading
+            import time
             import urllib.request
             import sys
 
             NOMAD = "http://localhost:4646"
             APPS_FILE = "/opt/nomad/launcher/apps.json"
+            SCALER_INTERVAL = 30
 
             PAGE = """<!DOCTYPE html>
             <html>
@@ -57,6 +61,84 @@ resource "nomad_job" "launcher" {
                 except (FileNotFoundError, json.JSONDecodeError):
                     return {}
 
+            class Scaler:
+                def __init__(self):
+                    self.last_active = {}
+                    t = threading.Thread(target=self._loop, daemon=True)
+                    t.start()
+                    print("scaler: started (interval=%ds)" % SCALER_INTERVAL, flush=True)
+
+                def touch(self, host):
+                    self.last_active[host] = time.time()
+
+                def _loop(self):
+                    while True:
+                        time.sleep(SCALER_INTERVAL)
+                        try:
+                            self._check()
+                        except Exception as e:
+                            print("scaler: error: %s" % e, flush=True)
+
+                def _check(self):
+                    apps = load_apps()
+                    now = time.time()
+                    for host, app in apps.items():
+                        port = app.get("port")
+                        timeout = app.get("idle_timeout")
+                        if not port or not timeout:
+                            continue
+                        try:
+                            self._check_app(host, app, port, timeout, now)
+                        except Exception as e:
+                            print("scaler: error checking %s: %s" % (host, e), flush=True)
+
+                def _check_app(self, host, app, port, timeout, now):
+                    # Check if job is running
+                    job_id = app["job"]
+                    try:
+                        resp = urllib.request.urlopen(NOMAD + "/v1/job/" + job_id + "/summary")
+                        summary = json.loads(resp.read())
+                    except Exception:
+                        return
+                    group = app["group"]
+                    gs = summary.get("Summary", {}).get(group, {})
+                    if gs.get("Running", 0) == 0:
+                        return
+
+                    # Count TCP connections
+                    result = subprocess.run(
+                        ["ss", "-tn", "state", "established", "sport", "=", ":%d" % port],
+                        capture_output=True, text=True, timeout=5)
+                    if result.returncode != 0:
+                        return
+                    # First line is header, remaining lines are connections
+                    lines = result.stdout.strip().split("\n")
+                    conns = max(0, len(lines) - 1)
+
+                    if conns > 0:
+                        self.last_active[host] = now
+                        return
+
+                    last = self.last_active.get(host)
+                    if last is None:
+                        self.last_active[host] = now
+                        return
+
+                    if now - last < timeout:
+                        return
+
+                    # Scale to zero
+                    print("scaler: scaling down %s (idle %ds)" % (host, int(now - last)), flush=True)
+                    req = urllib.request.Request(
+                        NOMAD + "/v1/job/" + job_id + "/scale",
+                        data=json.dumps({"Count": 0, "Target": {"Group": group}}).encode(),
+                        headers={"Content-Type": "application/json"},
+                        method="POST")
+                    urllib.request.urlopen(req)
+                    self.last_active.pop(host, None)
+
+            scaler = None
+
             class H(http.server.BaseHTTPRequestHandler):
                 def _handle(self):
                     host = self.headers.get("Host", "").split(":")[0]
@@ -77,6 +159,7 @@ resource "nomad_job" "launcher" {
                         urllib.request.urlopen(req)
                     except Exception as e:
                         print("launcher: " + str(e), file=sys.stderr, flush=True)
+                    scaler.touch(host)
                     self.send_response(200)
                     self.send_header("Content-Type", "text/html")
                     self.end_headers()
@@ -91,6 +174,7 @@ resource "nomad_job" "launcher" {
                     pass
 
             if __name__ == "__main__":
+                scaler = Scaler()
                 print("launcher: listening on :9090", flush=True)
                 http.server.HTTPServer(("0.0.0.0", 9090), H).serve_forever()
             SCRIPT
@@ -98,8 +182,8 @@ resource "nomad_job" "launcher" {
           }
 
           resources {
-            cpu    = 50
-            memory = 64
+            cpu    = 100
+            memory = 96
           }
         }
       }
