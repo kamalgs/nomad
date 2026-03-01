@@ -1,0 +1,249 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+DOMAIN="gkamal.online"
+CADDY_APPS="/opt/nomad/caddy/apps"
+LAUNCHER_APPS="/opt/nomad/launcher/apps.json"
+DEFAULT_CPU=256
+DEFAULT_MEMORY=512
+
+usage() {
+  cat <<EOF
+Usage:
+  ./deploy <name> <image> <port> [options]     Deploy or update an app
+  ./deploy --rm <name>                         Remove an app
+  ./deploy --ls                                List deployed apps
+
+Options:
+  --ondemand       Scale-to-zero app (woken by launcher)
+  --cpu N          CPU shares (default: $DEFAULT_CPU)
+  --memory N       Memory in MB (default: $DEFAULT_MEMORY)
+  -e KEY=VALUE     Environment variable (repeatable)
+EOF
+  exit 1
+}
+
+reload_caddy() {
+  local alloc
+  alloc=$(nomad job allocs -t '{{range .}}{{if eq .ClientStatus "running"}}{{.ID}}{{end}}{{end}}' gateway | head -c 36)
+  if [[ -z "$alloc" ]]; then
+    echo "Warning: no running gateway allocation found, skipping Caddy reload" >&2
+    return
+  fi
+  nomad alloc exec -task caddy "$alloc" caddy reload --config /etc/caddy/Caddyfile 2>/dev/null || true
+}
+
+update_launcher_config() {
+  local action="$1" name="$2" port="${3:-}"
+  local host="${name}.${DOMAIN}"
+
+  python3 -c "
+import json, sys
+action, host, name, port = sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4]
+try:
+    with open('$LAUNCHER_APPS') as f:
+        apps = json.load(f)
+except (FileNotFoundError, json.JSONDecodeError):
+    apps = {}
+if action == 'add':
+    apps[host] = {'job': name, 'group': name}
+elif action == 'remove':
+    apps.pop(host, None)
+with open('$LAUNCHER_APPS', 'w') as f:
+    json.dump(apps, f, indent=2)
+" "$action" "$host" "$name" "$port"
+}
+
+deploy_app() {
+  local name="$1" image="$2" port="$3" ondemand="$4" cpu="$5" memory="$6"
+  shift 6
+  local env_vars=("$@")
+
+  local count=1
+  [[ "$ondemand" == "true" ]] && count=0
+
+  local host="${name}.${DOMAIN}"
+
+  # Build env block
+  local env_block="PORT = \"${port}\""
+  for ev in "${env_vars[@]}"; do
+    local key="${ev%%=*}"
+    local val="${ev#*=}"
+    env_block="${env_block}
+            ${key} = \"${val}\""
+  done
+
+  # Submit Nomad job
+  echo "Submitting job '${name}'..."
+  nomad job run -detach - <<EOF
+job "${name}" {
+  datacenters = ["dc1"]
+  type        = "service"
+
+  group "${name}" {
+    count = ${count}
+
+    network {
+      mode = "host"
+    }
+
+    task "${name}" {
+      driver = "docker"
+
+      config {
+        image        = "${image}"
+        network_mode = "host"
+      }
+
+      env {
+        ${env_block}
+      }
+
+      resources {
+        cpu    = ${cpu}
+        memory = ${memory}
+      }
+    }
+  }
+}
+EOF
+
+  # Write Caddy snippet
+  echo "Writing Caddy route for ${host}..."
+  if [[ "$ondemand" == "true" ]]; then
+    cat > "${CADDY_APPS}/${name}.caddy" <<CADDY
+${host} {
+    reverse_proxy {
+        to localhost:${port} localhost:9090
+        lb_policy first
+        lb_retries 1
+        fail_duration 10s
+    }
+}
+CADDY
+    update_launcher_config add "$name" "$port"
+  else
+    cat > "${CADDY_APPS}/${name}.caddy" <<CADDY
+${host} {
+    reverse_proxy localhost:${port}
+}
+CADDY
+  fi
+
+  # Reload Caddy
+  echo "Reloading Caddy..."
+  reload_caddy
+
+  echo "Deployed ${name} -> ${host}"
+}
+
+remove_app() {
+  local name="$1"
+
+  echo "Stopping job '${name}'..."
+  nomad job stop -purge "$name" 2>/dev/null || true
+
+  echo "Removing Caddy route..."
+  rm -f "${CADDY_APPS}/${name}.caddy"
+
+  echo "Updating launcher config..."
+  update_launcher_config remove "$name" ""
+
+  echo "Reloading Caddy..."
+  reload_caddy
+
+  echo "Removed ${name}"
+}
+
+list_apps() {
+  printf "%-20s %-10s %s\n" "NAME" "TYPE" "ROUTE"
+  printf "%-20s %-10s %s\n" "----" "----" "-----"
+
+  # Read launcher apps for on-demand detection
+  local launcher_hosts=""
+  if [[ -f "$LAUNCHER_APPS" ]]; then
+    launcher_hosts=$(python3 -c "
+import json
+try:
+    with open('$LAUNCHER_APPS') as f:
+        apps = json.load(f)
+    for h in apps:
+        print(h)
+except:
+    pass
+")
+  fi
+
+  for f in "${CADDY_APPS}"/*.caddy; do
+    [[ -f "$f" ]] || continue
+    local app_name
+    app_name=$(basename "$f" .caddy)
+    local host="${app_name}.${DOMAIN}"
+    local app_type="always-on"
+    if echo "$launcher_hosts" | grep -q "^${host}$"; then
+      app_type="on-demand"
+    fi
+    printf "%-20s %-10s %s\n" "$app_name" "$app_type" "https://${host}"
+  done
+}
+
+# --- Argument parsing ---
+
+if [[ $# -eq 0 ]]; then
+  usage
+fi
+
+case "$1" in
+  --ls)
+    list_apps
+    exit 0
+    ;;
+  --rm)
+    [[ $# -lt 2 ]] && usage
+    remove_app "$2"
+    exit 0
+    ;;
+  --help|-h)
+    usage
+    ;;
+esac
+
+# Deploy mode: <name> <image> <port> [options]
+[[ $# -lt 3 ]] && usage
+
+NAME="$1"
+IMAGE="$2"
+PORT="$3"
+shift 3
+
+ONDEMAND="false"
+CPU="$DEFAULT_CPU"
+MEMORY="$DEFAULT_MEMORY"
+ENV_VARS=()
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --ondemand)
+      ONDEMAND="true"
+      shift
+      ;;
+    --cpu)
+      CPU="$2"
+      shift 2
+      ;;
+    --memory)
+      MEMORY="$2"
+      shift 2
+      ;;
+    -e)
+      ENV_VARS+=("$2")
+      shift 2
+      ;;
+    *)
+      echo "Unknown option: $1" >&2
+      usage
+      ;;
+  esac
+done
+
+deploy_app "$NAME" "$IMAGE" "$PORT" "$ONDEMAND" "$CPU" "$MEMORY" "${ENV_VARS[@]+"${ENV_VARS[@]}"}"
