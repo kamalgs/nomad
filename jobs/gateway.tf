@@ -48,7 +48,15 @@ resource "nomad_job" "gateway" {
           }
 
           template {
-            data        = "import /apps/*.caddy"
+            data        = <<-CADDYFILE
+            {
+              log {
+                output stdout
+                format json
+              }
+            }
+            import /apps/*.caddy
+            CADDYFILE
             destination = "local/Caddyfile"
             change_mode = "restart"
           }
