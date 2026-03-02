@@ -15,18 +15,34 @@ resource "terraform_data" "nomad_install" {
       unzip -o "$tmp/nomad.zip" -d "${var.install_dir}"
       chmod +x "${var.install_dir}/nomad"
       rm -rf "$tmp"
-      mkdir -p "${var.data_dir}" "${var.config_dir}" "/opt/nomad/volumes/caddy_data" "/opt/nomad/volumes/jupyter_data" "/opt/nomad/volumes/o3000y_data" "/opt/nomad/caddy/apps" "/opt/nomad/launcher"
+      mkdir -p "${var.data_dir}" "${var.config_dir}" "/opt/nomad/volumes/caddy_data" "/opt/nomad/volumes/jupyter_data" "/opt/nomad/volumes/o3000y_data" "/opt/nomad/volumes/hyperdx_data" "/opt/nomad/caddy/apps" "/opt/nomad/launcher"
 
       # Seed initial Caddy route snippets
       cat > /opt/nomad/caddy/apps/o3000y.caddy << 'CADDY'
 o3000y.gkamal.online {
-    reverse_proxy localhost:8080
+    reverse_proxy {
+        to localhost:8081 localhost:9090
+        lb_policy first
+        lb_retries 1
+        fail_duration 10s
+    }
 }
 CADDY
 
       cat > /opt/nomad/caddy/apps/alphaa.caddy << 'CADDY'
 alphaa.gkamal.online {
-    reverse_proxy localhost:8000
+    reverse_proxy {
+        to localhost:8000 localhost:9090
+        lb_policy first
+        lb_retries 1
+        fail_duration 10s
+    }
+}
+CADDY
+
+      cat > /opt/nomad/caddy/apps/hyperdx.caddy << 'CADDY'
+hyperdx.gkamal.online {
+    reverse_proxy localhost:8080
 }
 CADDY
 
@@ -44,7 +60,7 @@ CADDY
 
       # Seed launcher apps config with on-demand apps
       test -f /opt/nomad/launcher/apps.json || cat > /opt/nomad/launcher/apps.json << 'JSON'
-{"jupyter.gkamal.online": {"job": "jupyter", "group": "jupyter", "port": 4180, "idle_timeout": 900}, "o3000y.gkamal.online": {"job": "o3000y", "group": "app", "port": 8080, "idle_timeout": 900}, "alphaa.gkamal.online": {"job": "alphaa", "group": "app", "port": 8000, "idle_timeout": 900}}
+{"jupyter.gkamal.online": {"job": "jupyter", "group": "jupyter", "port": 4180, "idle_timeout": 900}, "o3000y.gkamal.online": {"job": "o3000y", "group": "app", "port": 8081, "idle_timeout": 900}, "alphaa.gkamal.online": {"job": "alphaa", "group": "app", "port": 8000, "idle_timeout": 900}}
 JSON
     EOT
   }

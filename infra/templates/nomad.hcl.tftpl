@@ -34,6 +34,11 @@ client {
     path      = "/opt/nomad/volumes/o3000y_data"
     read_only = false
   }
+
+  host_volume "hyperdx_data" {
+    path      = "/opt/nomad/volumes/hyperdx_data"
+    read_only = false
+  }
 }
 
 plugin "docker" {
