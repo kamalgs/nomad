@@ -20,6 +20,7 @@ resource "terraform_data" "nomad_install" {
       # Seed initial Caddy route snippets
       cat > /opt/nomad/caddy/apps/o3000y.caddy << 'CADDY'
 o3000y.gkamal.online {
+    encode zstd gzip
     reverse_proxy {
         to localhost:8081 localhost:9090
         lb_policy first
@@ -31,6 +32,7 @@ CADDY
 
       cat > /opt/nomad/caddy/apps/alphaa.caddy << 'CADDY'
 alphaa.gkamal.online {
+    encode zstd gzip
     reverse_proxy {
         to localhost:8000 localhost:9090
         lb_policy first
@@ -42,6 +44,7 @@ CADDY
 
       cat > /opt/nomad/caddy/apps/hyperdx.caddy << 'CADDY'
 hyperdx.gkamal.online {
+    encode zstd gzip
     reverse_proxy localhost:8080
 }
 CADDY
