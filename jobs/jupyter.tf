@@ -25,12 +25,12 @@ resource "nomad_job" "jupyter" {
             network_mode = "host"
             args = [
               "jupyter-lab",
-              "--ip=127.0.0.1", "--port=8888", "--no-browser",
+              "--ip=127.0.0.1", "--port=${local.ports.jupyter}", "--no-browser",
               "--ServerApp.token=''", "--ServerApp.password=''",
               "--ServerApp.allow_remote_access=True",
               "--ServerApp.allow_origin='*'",
               "--ServerApp.disable_check_xsrf=True",
-              "--ServerApp.websocket_compression=False",
+              "--ServerApp.websocket_compression_options={}",
               "--notebook-dir=/home/jovyan/notebooks",
             ]
           }
@@ -57,8 +57,8 @@ resource "nomad_job" "jupyter" {
 
           template {
             data        = <<-CFG
-            http_address = "127.0.0.1:4180"
-            upstreams = ["http://127.0.0.1:8888"]
+            http_address = "127.0.0.1:${local.ports.jupyter_oauth}"
+            upstreams = ["http://127.0.0.1:${local.ports.jupyter}"]
             provider = "github"
             client_id = "${var.oauth_client_id}"
             client_secret = "${var.oauth_client_secret}"

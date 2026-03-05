@@ -39,6 +39,11 @@ client {
     path      = "/opt/nomad/volumes/hyperdx_data"
     read_only = false
   }
+
+  host_volume "foliozzz_data" {
+    path      = "/opt/nomad/volumes/foliozzz_data"
+    read_only = true
+  }
 }
 
 plugin "docker" {

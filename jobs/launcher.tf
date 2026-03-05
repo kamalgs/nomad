@@ -9,7 +9,7 @@ resource "nomad_job" "launcher" {
 
         network {
           port "http" {
-            static = 9090
+            static = ${local.ports.launcher}
           }
         }
 
@@ -175,8 +175,8 @@ resource "nomad_job" "launcher" {
 
             if __name__ == "__main__":
                 scaler = Scaler()
-                print("launcher: listening on :9090", flush=True)
-                http.server.HTTPServer(("0.0.0.0", 9090), H).serve_forever()
+                print("launcher: listening on :${local.ports.launcher}", flush=True)
+                http.server.HTTPServer(("0.0.0.0", ${local.ports.launcher}), H).serve_forever()
             SCRIPT
             destination = "local/launcher.py"
           }

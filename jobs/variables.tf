@@ -27,3 +27,8 @@ variable "oauth_cookie_secret" {
 variable "oauth_github_user" {
   type = string
 }
+
+variable "openwebui_secret_key" {
+  type      = string
+  sensitive = true
+}
