@@ -36,6 +36,7 @@ Check this file before assigning a new port.
 | 8082 | Open WebUI | Web UI | `jobs/openwebui.tf` |
 | 8085 | foliozzz | Web UI | `jobs/foliozzz.tf` |
 | 8086 | nats-chat | Chat web UI | `jobs/nats-chat.tf` |
+| 8090 | llm-gateway | KrakenD LLM proxy | `jobs/llm-gateway.tf` |
 | 8888 | HyperDX | Internal metrics (not configurable) | `jobs/hyperdx.tf` |
 | 8899 | Jupyter | Notebook server | `jobs/jupyter.tf` |
 | 9090 | Launcher | Scale-to-zero launcher | `jobs/launcher.tf` |
@@ -47,7 +48,7 @@ Check this file before assigning a new port.
 | 4180–4199 | 4181 |
 | 4220–4299 | 4225 |
 | 4300–4399 | 4328 |
-| 8000–8099 | 8087 |
+| 8000–8099 | 8091 |
 | 8800–8899 | 8900 (range full — extend or use another range) |
 | 9090–9099 | 9091 |
 

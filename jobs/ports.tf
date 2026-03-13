@@ -13,6 +13,7 @@ locals {
     nats_leaf     = 4223
     nats_leaf_ws  = 4224
     nats_chat     = 8086
+    llm_gateway   = 8090
     # HyperDX internal (not configurable, documented only)
     # otel_grpc   = 4317
     # otel_http   = 4318

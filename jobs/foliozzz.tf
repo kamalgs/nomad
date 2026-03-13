@@ -4,6 +4,10 @@ resource "nomad_job" "foliozzz" {
       datacenters = ["dc1"]
       type        = "service"
 
+      meta {
+        deployed_at = "2026-03-06T10:00:00Z"
+      }
+
       group "foliozzz" {
         count = 1
 
