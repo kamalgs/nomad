@@ -5,7 +5,7 @@ resource "nomad_job" "launcher" {
       type        = "service"
 
       group "launcher" {
-        count = 1
+        count = 0
 
         network {
           port "http" {

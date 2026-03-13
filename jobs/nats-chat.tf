@@ -6,7 +6,7 @@ resource "nomad_job" "nats_chat" {
 
       # ── upstream nats-server ──────────────────────────────────────────
       group "nats" {
-        count = 1
+        count = 0
 
         network {
           mode = "host"
@@ -33,7 +33,7 @@ resource "nomad_job" "nats_chat" {
 
       # ── leaf node gateway ─────────────────────────────────────────────
       group "leaf-gateway" {
-        count = 1
+        count = 0
 
         network {
           mode = "host"
@@ -61,7 +61,7 @@ resource "nomad_job" "nats_chat" {
 
       # ── chat web app ──────────────────────────────────────────────────
       group "chat-app" {
-        count = 1
+        count = 0
 
         network {
           mode = "host"

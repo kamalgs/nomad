@@ -9,7 +9,7 @@ resource "nomad_job" "foliozzz" {
       }
 
       group "foliozzz" {
-        count = 1
+        count = 0
 
         network {
           mode = "host"

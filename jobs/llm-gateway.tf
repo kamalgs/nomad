@@ -15,7 +15,7 @@ resource "nomad_job" "llm_gateway" {
       type        = "service"
 
       group "llm-gateway" {
-        count = 1
+        count = 0
 
         network {
           mode = "host"
