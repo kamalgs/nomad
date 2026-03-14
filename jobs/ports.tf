@@ -4,7 +4,7 @@ locals {
     jupyter_oauth = 4180
     jupyter       = 8899
     alphaa        = 8000
-    o3000y_rest   = 8081
+    o3000y_rest   = 8083
     o3000y_grpc   = 4327
     openwebui     = 8082
     hyperdx       = 8080
