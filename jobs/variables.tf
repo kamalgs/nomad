@@ -28,6 +28,16 @@ variable "oauth_github_user" {
   type = string
 }
 
+variable "marimo_oauth_client_id" {
+  type      = string
+  sensitive = true
+}
+
+variable "marimo_oauth_client_secret" {
+  type      = string
+  sensitive = true
+}
+
 variable "openwebui_secret_key" {
   type      = string
   sensitive = true

@@ -30,6 +30,11 @@ client {
     read_only = false
   }
 
+  host_volume "marimo_data" {
+    path      = "/opt/nomad/volumes/marimo_data"
+    read_only = false
+  }
+
   host_volume "o3000y_data" {
     path      = "/opt/nomad/volumes/o3000y_data"
     read_only = false

@@ -23,6 +23,7 @@ Check this file before assigning a new port.
 | 80 | Caddy | HTTP (auto-redirect to HTTPS) | `jobs/gateway.tf` |
 | 443 | Caddy | HTTPS termination | `jobs/gateway.tf` |
 | 4180 | oauth2-proxy | Jupyter auth proxy | `jobs/jupyter.tf` |
+| 4181 | oauth2-proxy | Marimo auth proxy | `jobs/marimo.tf` |
 | 4317 | HyperDX | OTEL gRPC collector (internal, not configurable) | `jobs/hyperdx.tf` |
 | 4318 | HyperDX | OTEL HTTP collector (internal, not configurable) | `jobs/hyperdx.tf` |
 | 4222 | nats-server | NATS upstream TCP | `jobs/nats-chat.tf` |
@@ -38,6 +39,7 @@ Check this file before assigning a new port.
 | 8086 | nats-chat | Chat web UI | `jobs/nats-chat.tf` |
 | 8090 | llm-gateway | KrakenD LLM proxy | `jobs/llm-gateway.tf` |
 | 8888 | HyperDX | Internal metrics (not configurable) | `jobs/hyperdx.tf` |
+| 8800 | marimo | Reactive notebook | `jobs/marimo.tf` |
 | 8899 | Jupyter | Notebook server | `jobs/jupyter.tf` |
 | 9090 | Launcher | Scale-to-zero launcher | `jobs/launcher.tf` |
 
@@ -45,11 +47,11 @@ Check this file before assigning a new port.
 
 | Range | Next available |
 |-------|---------------|
-| 4180–4199 | 4181 |
+| 4180–4199 | 4182 |
 | 4220–4299 | 4225 |
 | 4300–4399 | 4328 |
 | 8000–8099 | 8091 |
-| 8800–8899 | 8900 (range full — extend or use another range) |
+| 8800–8899 | 8801 |
 | 9090–9099 | 9091 |
 
 ## Notes

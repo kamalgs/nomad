@@ -14,6 +14,8 @@ locals {
     nats_leaf_ws  = 4224
     nats_chat     = 8086
     llm_gateway   = 8090
+    marimo_oauth  = 4181
+    marimo        = 8800
     # HyperDX internal (not configurable, documented only)
     # otel_grpc   = 4317
     # otel_http   = 4318
