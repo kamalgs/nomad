@@ -16,7 +16,7 @@ locals {
     llm_gateway   = 8090
     marimo_oauth  = 4181
     marimo        = 8800
-    subprime      = 8091
+    finadvisor    = 8091
     # HyperDX internal (not configurable, documented only)
     # otel_grpc   = 4317
     # otel_http   = 4318

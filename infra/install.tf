@@ -15,7 +15,7 @@ resource "terraform_data" "nomad_install" {
       unzip -o "$tmp/nomad.zip" -d "${var.install_dir}"
       chmod +x "${var.install_dir}/nomad"
       rm -rf "$tmp"
-      mkdir -p "${var.data_dir}" "${var.config_dir}" "/opt/nomad/volumes/caddy_data" "/opt/nomad/volumes/jupyter_data" "/opt/nomad/volumes/marimo_data" "/opt/nomad/volumes/o3000y_data" "/opt/nomad/volumes/hyperdx_data" "/opt/nomad/volumes/foliozzz_data" "/opt/nomad/volumes/subprime_data" "/opt/nomad/caddy/apps" "/opt/nomad/launcher"
+      mkdir -p "${var.data_dir}" "${var.config_dir}" "/opt/nomad/volumes/caddy_data" "/opt/nomad/volumes/jupyter_data" "/opt/nomad/volumes/marimo_data" "/opt/nomad/volumes/o3000y_data" "/opt/nomad/volumes/hyperdx_data" "/opt/nomad/volumes/foliozzz_data" "/opt/nomad/volumes/finadvisor_data" "/opt/nomad/caddy/apps" "/opt/nomad/launcher"
 
       # Seed initial Caddy route snippets (port assignments in PORTS.md)
       cat > /opt/nomad/caddy/apps/o3000y.caddy << 'CADDY'
@@ -80,8 +80,8 @@ foliozzz.gkamal.online {
 }
 CADDY
 
-      cat > /opt/nomad/caddy/apps/subprime.caddy << 'CADDY'
-subprime.gkamal.online {
+      cat > /opt/nomad/caddy/apps/finadvisor.caddy << 'CADDY'
+finadvisor.gkamal.online {
     encode zstd gzip
     reverse_proxy {
         to localhost:8091 localhost:9090
@@ -94,7 +94,7 @@ CADDY
 
       # Seed launcher apps config with on-demand apps
       test -f /opt/nomad/launcher/apps.json || cat > /opt/nomad/launcher/apps.json << 'JSON'
-{"jupyter.gkamal.online": {"job": "jupyter", "group": "jupyter", "port": 4180, "idle_timeout": 900}, "marimo.gkamal.online": {"job": "marimo", "group": "marimo", "port": 4181, "idle_timeout": 900}, "o3000y.gkamal.online": {"job": "o3000y", "group": "app", "port": 8081, "idle_timeout": 900}, "alphaa.gkamal.online": {"job": "alphaa", "group": "app", "port": 8000, "idle_timeout": 900}, "subprime.gkamal.online": {"job": "subprime", "group": "subprime", "port": 8091, "idle_timeout": 900}}
+{"jupyter.gkamal.online": {"job": "jupyter", "group": "jupyter", "port": 4180, "idle_timeout": 900}, "marimo.gkamal.online": {"job": "marimo", "group": "marimo", "port": 4181, "idle_timeout": 900}, "o3000y.gkamal.online": {"job": "o3000y", "group": "app", "port": 8081, "idle_timeout": 900}, "alphaa.gkamal.online": {"job": "alphaa", "group": "app", "port": 8000, "idle_timeout": 900}, "finadvisor.gkamal.online": {"job": "finadvisor", "group": "finadvisor", "port": 8091, "idle_timeout": 900}}
 JSON
     EOT
   }

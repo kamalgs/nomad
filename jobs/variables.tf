@@ -43,7 +43,7 @@ variable "openwebui_secret_key" {
   sensitive = true
 }
 
-variable "subprime_anthropic_api_key" {
+variable "finadvisor_anthropic_api_key" {
   type      = string
   sensitive = true
 }
