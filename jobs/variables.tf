@@ -42,3 +42,8 @@ variable "openwebui_secret_key" {
   type      = string
   sensitive = true
 }
+
+variable "subprime_anthropic_api_key" {
+  type      = string
+  sensitive = true
+}

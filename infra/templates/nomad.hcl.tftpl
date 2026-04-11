@@ -49,6 +49,11 @@ client {
     path      = "/opt/nomad/volumes/foliozzz_data"
     read_only = true
   }
+
+  host_volume "subprime_data" {
+    path      = "/opt/nomad/volumes/subprime_data"
+    read_only = false
+  }
 }
 
 plugin "docker" {
