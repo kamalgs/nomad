@@ -26,14 +26,16 @@ resource "nomad_job" "subprime" {
           }
 
           env {
-            ANTHROPIC_API_KEY  = "${var.subprime_anthropic_api_key}"
-            GRADIO_SERVER_NAME = "127.0.0.1"
-            GRADIO_SERVER_PORT = "${local.ports.subprime}"
+            ANTHROPIC_API_KEY           = "${var.subprime_anthropic_api_key}"
+            GRADIO_SERVER_NAME          = "127.0.0.1"
+            GRADIO_SERVER_PORT          = "${local.ports.subprime}"
+            SUBPRIME_DATA_DIR           = "/app/state/data"
+            SUBPRIME_CONVERSATIONS_DIR  = "/app/state/conversations"
           }
 
           volume_mount {
             volume      = "subprime_data"
-            destination = "/app/conversations"
+            destination = "/app/state"
           }
 
           resources {
