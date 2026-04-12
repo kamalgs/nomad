@@ -5,7 +5,7 @@ resource "nomad_job" "finadvisor" {
       type        = "service"
 
       group "finadvisor" {
-        count = 0
+        count = 1
 
         network {
           mode = "host"
@@ -28,10 +28,14 @@ resource "nomad_job" "finadvisor" {
 
           env {
             ANTHROPIC_API_KEY          = "${var.finadvisor_anthropic_api_key}"
-            GRADIO_SERVER_NAME         = "127.0.0.1"
-            GRADIO_SERVER_PORT         = "${local.ports.finadvisor}"
             SUBPRIME_DATA_DIR          = "/app/state/data"
             SUBPRIME_CONVERSATIONS_DIR = "/app/state/conversations"
+            DATABASE_URL               = "postgresql://finadvisor:${var.postgres_password}@localhost:${local.ports.postgresql}/finadvisor"
+            SMTP_HOST                  = "${var.smtp_host}"
+            SMTP_PORT                  = "${var.smtp_port}"
+            SMTP_USER                  = "${var.smtp_user}"
+            SMTP_PASSWORD              = "${var.smtp_password}"
+            SMTP_FROM                  = "${var.smtp_from}"
           }
 
           volume_mount {

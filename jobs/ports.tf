@@ -17,6 +17,7 @@ locals {
     marimo_oauth  = 4181
     marimo        = 8800
     finadvisor    = 8091
+    postgresql    = 5432
     # HyperDX internal (not configurable, documented only)
     # otel_grpc   = 4317
     # otel_http   = 4318

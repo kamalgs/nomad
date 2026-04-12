@@ -54,6 +54,11 @@ client {
     path      = "/opt/nomad/volumes/finadvisor_data"
     read_only = false
   }
+
+  host_volume "postgres_data" {
+    path      = "/opt/nomad/volumes/postgres_data"
+    read_only = false
+  }
 }
 
 plugin "docker" {
