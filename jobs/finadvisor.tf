@@ -22,6 +22,7 @@ resource "nomad_job" "finadvisor" {
 
           config {
             image        = "finadvisor:local"
+            force_pull   = false
             network_mode = "host"
           }
 
