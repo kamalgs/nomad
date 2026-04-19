@@ -5,7 +5,7 @@ resource "nomad_job" "gateway" {
       type        = "service"
 
       group "caddy" {
-        count = 0
+        count = 1
 
         network {
           mode = "host"

@@ -40,8 +40,8 @@ resource "nomad_job" "data_refresh" {
           }
 
           resources {
-            cpu    = 1000
-            memory = 2560
+            cpu    = 500
+            memory = 512
           }
         }
       }

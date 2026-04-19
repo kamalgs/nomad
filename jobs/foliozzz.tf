@@ -5,11 +5,11 @@ resource "nomad_job" "foliozzz" {
       type        = "service"
 
       meta {
-        deployed_at = "2026-03-06T10:00:00Z"
+        deployed_at = "2026-03-19T12:00:00Z"
       }
 
       group "foliozzz" {
-        count = 0
+        count = 1
 
         network {
           mode = "host"
