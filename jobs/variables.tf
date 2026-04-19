@@ -48,6 +48,11 @@ variable "finadvisor_anthropic_api_key" {
   sensitive = true
 }
 
+variable "together_api_key" {
+  type      = string
+  sensitive = true
+}
+
 variable "postgres_password" {
   type      = string
   sensitive = true
@@ -77,4 +82,11 @@ variable "smtp_password" {
 variable "smtp_from" {
   type    = string
   default = "noreply@finadvisor.gkamal.online"
+}
+
+variable "subprime_otp_cheat" {
+  type        = string
+  sensitive   = true
+  default     = ""
+  description = "Optional bypass code for OTP verification (empty = disabled)"
 }

@@ -28,6 +28,9 @@ resource "nomad_job" "finadvisor" {
 
           env {
             ANTHROPIC_API_KEY          = "${var.finadvisor_anthropic_api_key}"
+            TOGETHER_API_KEY           = "${var.together_api_key}"
+            ADVISOR_MODEL              = "together:Qwen/Qwen3-235B-A22B-Instruct-2507-tput"
+            REFINE_MODEL               = "together:Qwen/Qwen3-235B-A22B-Instruct-2507-tput"
             SUBPRIME_DATA_DIR          = "/app/state/data"
             SUBPRIME_CONVERSATIONS_DIR = "/app/state/conversations"
             DATABASE_URL               = "postgresql://finadvisor:${var.postgres_password}@localhost:${local.ports.postgresql}/finadvisor"
@@ -36,6 +39,7 @@ resource "nomad_job" "finadvisor" {
             SMTP_USER                  = "${var.smtp_user}"
             SMTP_PASSWORD              = "${var.smtp_password}"
             SMTP_FROM                  = "${var.smtp_from}"
+            SUBPRIME_OTP_CHEAT         = "${var.subprime_otp_cheat}"
           }
 
           volume_mount {
