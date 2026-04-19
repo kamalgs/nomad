@@ -17,6 +17,35 @@ resource "nomad_job" "finadvisor" {
           read_only = false
         }
 
+        # Pre-start: apply DuckDB schema migrations while no one else has
+        # the DB open. The service task below uses read-only connections
+        # exclusively, so this is the one chance to write DDL.
+        task "migrate" {
+          driver = "docker"
+          lifecycle {
+            hook    = "prestart"
+            sidecar = false
+          }
+          config {
+            image        = "finadvisor:local"
+            force_pull   = false
+            network_mode = "host"
+            command      = "subprime"
+            args         = ["data", "migrate"]
+          }
+          env {
+            SUBPRIME_DATA_DIR = "/app/state/data"
+          }
+          volume_mount {
+            volume      = "finadvisor_data"
+            destination = "/app/state"
+          }
+          resources {
+            cpu    = 200
+            memory = 256
+          }
+        }
+
         task "finadvisor" {
           driver = "docker"
 
