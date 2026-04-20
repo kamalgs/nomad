@@ -90,3 +90,15 @@ variable "subprime_otp_cheat" {
   default     = ""
   description = "Optional bypass code for OTP verification (empty = disabled)"
 }
+
+variable "subprime_experiment" {
+  type        = string
+  default     = "prod"
+  description = "Label attached to every OTEL span/metric so Jaeger and Prometheus can aggregate by experiment (e.g. 'prod', 'ctx-optimize-rc1')."
+}
+
+variable "subprime_prompt_version" {
+  type        = string
+  default     = ""
+  description = "Optional prompt version label on OTEL resources (e.g. 'v2')."
+}

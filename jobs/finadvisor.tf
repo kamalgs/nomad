@@ -75,6 +75,10 @@ resource "nomad_job" "finadvisor" {
             OTEL_EXPORTER_OTLP_ENDPOINT     = "http://localhost:${local.ports.otel_http}"
             OTEL_EXPORTER_OTLP_PROTOCOL     = "http/protobuf"
             OTEL_METRIC_EXPORT_INTERVAL     = "30000"
+            # Slicing label for Jaeger / Prometheus. Set via terraform.tfvars
+            # to separate prod traffic from experiment runs sharing this app.
+            SUBPRIME_EXPERIMENT             = "${var.subprime_experiment}"
+            SUBPRIME_PROMPT_VERSION         = "${var.subprime_prompt_version}"
           }
 
           volume_mount {
