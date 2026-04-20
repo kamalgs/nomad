@@ -69,6 +69,12 @@ resource "nomad_job" "finadvisor" {
             SMTP_PASSWORD              = "${var.smtp_password}"
             SMTP_FROM                  = "${var.smtp_from}"
             SUBPRIME_OTP_CHEAT         = "${var.subprime_otp_cheat}"
+            # OpenTelemetry → Jaeger all-in-one (jobs/jaeger.tf).
+            # Jaeger listens on localhost:4318 (OTLP HTTP) via host networking.
+            OTEL_SERVICE_NAME               = "finadvisor-web"
+            OTEL_EXPORTER_OTLP_ENDPOINT     = "http://localhost:${local.ports.otel_http}"
+            OTEL_EXPORTER_OTLP_PROTOCOL     = "http/protobuf"
+            OTEL_METRIC_EXPORT_INTERVAL     = "30000"
           }
 
           volume_mount {

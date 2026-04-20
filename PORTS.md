@@ -24,15 +24,16 @@ Check this file before assigning a new port.
 | 443 | Caddy | HTTPS termination | `jobs/gateway.tf` |
 | 4180 | oauth2-proxy | Jupyter auth proxy | `jobs/jupyter.tf` |
 | 4181 | oauth2-proxy | Marimo auth proxy | `jobs/marimo.tf` |
-| 4317 | HyperDX | OTEL gRPC collector (internal, not configurable) | `jobs/hyperdx.tf` |
-| 4318 | HyperDX | OTEL HTTP collector (internal, not configurable) | `jobs/hyperdx.tf` |
+| 4317 | Jaeger | OTLP gRPC collector | `jobs/jaeger.tf` |
+| 4318 | Jaeger | OTLP HTTP collector | `jobs/jaeger.tf` |
 | 4222 | nats-server | NATS upstream TCP | `jobs/nats-chat.tf` |
 | 4223 | leaf-gateway | NATS leaf TCP | `jobs/nats-chat.tf` |
 | 4224 | leaf-gateway | NATS leaf WebSocket | `jobs/nats-chat.tf` |
 | 4327 | o3000y | gRPC API | `o3000y` repo `.nomad.hcl` |
 | 4646 | Nomad | API (reserved by Nomad itself) | system |
 | 8000 | alphaa | HTTP | `alphaa` repo `.nomad.hcl` |
-| 8080 | HyperDX | Web UI | `jobs/hyperdx.tf` |
+| 8080 | HyperDX | Web UI (job scaled to zero) | `jobs/hyperdx.tf` |
+| 16686 | Jaeger | Web UI | `jobs/jaeger.tf` |
 | 8081 | o3000y | REST API | `o3000y` repo `.nomad.hcl` |
 | 8082 | Open WebUI | Web UI | `jobs/openwebui.tf` |
 | 8085 | foliozzz | Web UI | `jobs/foliozzz.tf` |

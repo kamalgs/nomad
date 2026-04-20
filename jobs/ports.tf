@@ -20,9 +20,11 @@ locals {
     postgresql    = 5432
     mailpit_smtp  = 1025
     mailpit_ui    = 8025
-    # HyperDX internal (not configurable, documented only)
-    # otel_grpc   = 4317
-    # otel_http   = 4318
+    # Jaeger all-in-one (used by finadvisor OTEL export)
+    otel_grpc     = 4317
+    otel_http     = 4318
+    jaeger_ui     = 16686
+    # HyperDX internal (deprecated; job scaled to zero)
     # hdx_metrics = 8888
   }
 }

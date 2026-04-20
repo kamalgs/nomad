@@ -15,7 +15,7 @@ resource "terraform_data" "nomad_install" {
       unzip -o "$tmp/nomad.zip" -d "${var.install_dir}"
       chmod +x "${var.install_dir}/nomad"
       rm -rf "$tmp"
-      mkdir -p "${var.data_dir}" "${var.config_dir}" "/opt/nomad/volumes/caddy_data" "/opt/nomad/volumes/jupyter_data" "/opt/nomad/volumes/marimo_data" "/opt/nomad/volumes/o3000y_data" "/opt/nomad/volumes/hyperdx_data" "/opt/nomad/volumes/foliozzz_data" "/opt/nomad/volumes/finadvisor_data" "/opt/nomad/caddy/apps" "/opt/nomad/launcher"
+      mkdir -p "${var.data_dir}" "${var.config_dir}" "/opt/nomad/volumes/caddy_data" "/opt/nomad/volumes/jupyter_data" "/opt/nomad/volumes/marimo_data" "/opt/nomad/volumes/o3000y_data" "/opt/nomad/volumes/hyperdx_data" "/opt/nomad/volumes/jaeger_data" "/opt/nomad/volumes/foliozzz_data" "/opt/nomad/volumes/finadvisor_data" "/opt/nomad/caddy/apps" "/opt/nomad/launcher"
 
       # Seed initial Caddy route snippets (port assignments in PORTS.md)
       cat > /opt/nomad/caddy/apps/o3000y.caddy << 'CADDY'
