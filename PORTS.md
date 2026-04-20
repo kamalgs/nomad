@@ -20,8 +20,8 @@ Check this file before assigning a new port.
 
 | Port | Service | Purpose | Managed in |
 |------|---------|---------|------------|
-| 80 | Caddy | HTTP (auto-redirect to HTTPS) | `jobs/gateway.tf` |
-| 443 | Caddy | HTTPS termination | `jobs/gateway.tf` |
+| 80 | Caddy | HTTP (auto-redirect to HTTPS) | systemd `caddy.service` |
+| 443 | Caddy | HTTPS termination | systemd `caddy.service` |
 | 4180 | oauth2-proxy | Jupyter auth proxy | `jobs/jupyter.tf` |
 | 4181 | oauth2-proxy | Marimo auth proxy | `jobs/marimo.tf` |
 | 4317 | HyperDX | OTLP gRPC collector | `jobs/hyperdx.tf` |
