@@ -5,7 +5,7 @@ resource "nomad_job" "hyperdx" {
       type        = "service"
 
       group "hyperdx" {
-        count = 0
+        count = 1
 
         network {
           mode = "host"

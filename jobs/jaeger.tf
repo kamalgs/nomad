@@ -4,8 +4,10 @@ resource "nomad_job" "jaeger" {
       datacenters = ["dc1"]
       type        = "service"
 
+      # count=0 — HyperDX owns 4317/4318. Kept as a fallback: bump to 1 and
+      # scale hyperdx to 0 to swap back.
       group "jaeger" {
-        count = 1
+        count = 0
 
         network {
           mode = "host"
