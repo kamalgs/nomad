@@ -102,3 +102,10 @@ variable "subprime_prompt_version" {
   default     = ""
   description = "Optional prompt version label on OTEL resources (e.g. 'v2')."
 }
+
+variable "hyperdx_ingest_token" {
+  type        = string
+  sensitive   = true
+  default     = ""
+  description = "Bearer token for HyperDX's OTLP collector. Read from /etc/otel/supervisor-data/effective.yaml inside the hyperdx container, or copy from HyperDX UI → Team Settings → Ingestion API Key."
+}
