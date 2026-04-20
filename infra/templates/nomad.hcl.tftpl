@@ -45,6 +45,11 @@ client {
     read_only = false
   }
 
+  host_volume "hyperdx_mongo" {
+    path      = "/opt/nomad/volumes/hyperdx_mongo"
+    read_only = false
+  }
+
   host_volume "foliozzz_data" {
     path      = "/opt/nomad/volumes/foliozzz_data"
     read_only = true

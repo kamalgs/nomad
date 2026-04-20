@@ -17,6 +17,14 @@ resource "nomad_job" "hyperdx" {
           read_only = false
         }
 
+        # MongoDB holds UI state: users, sources, dashboards, saved
+        # searches, API keys. Without this mount they vanish on restart.
+        volume "hyperdx_mongo" {
+          type      = "host"
+          source    = "hyperdx_mongo"
+          read_only = false
+        }
+
         task "hyperdx" {
           driver = "docker"
 
@@ -35,6 +43,11 @@ resource "nomad_job" "hyperdx" {
           volume_mount {
             volume      = "hyperdx_data"
             destination = "/var/lib/clickhouse"
+          }
+
+          volume_mount {
+            volume      = "hyperdx_mongo"
+            destination = "/data/db"
           }
 
           resources {
