@@ -25,6 +25,13 @@ resource "nomad_job" "hyperdx" {
             network_mode = "host"
           }
 
+          env {
+            # External URL Caddy reverse-proxies to — HyperDX uses this for
+            # post-login redirects and absolute URLs in emails / API refs.
+            # Without this it emits http://localhost:8080 and breaks login.
+            FRONTEND_URL = "https://hyperdx.gkamal.online"
+          }
+
           volume_mount {
             volume      = "hyperdx_data"
             destination = "/var/lib/clickhouse"
