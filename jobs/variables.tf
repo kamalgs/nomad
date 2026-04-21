@@ -181,3 +181,15 @@ variable "advisor_model_basic" {
   default     = ""
   description = "Basic-tier advisor model override. Empty → basic tier uses ADVISOR_MODEL. Intended for a small Workers AI model (e.g. 'workers-ai:@cf/meta/llama-3.3-70b-instruct-fp8-fast')."
 }
+
+variable "advisor_model" {
+  type        = string
+  default     = "workers-ai:@cf/meta/llama-3.3-70b-instruct-fp8-fast"
+  description = "Default advisor model — used for Premium tier and as the Basic-tier fallback when advisor_model_basic is empty."
+}
+
+variable "refine_model" {
+  type        = string
+  default     = "none"
+  description = "Senior-reviewer model for the refine pass. 'none' skips refinement. Set to a workers-ai or anthropic model to enable."
+}
