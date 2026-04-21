@@ -89,8 +89,16 @@ locals {
           env {
             ANTHROPIC_API_KEY          = "${var.finadvisor_anthropic_api_key}"
             TOGETHER_API_KEY           = "${var.together_api_key}"
+            CLOUDFLARE_API_TOKEN       = "${var.cloudflare_api_token}"
             ADVISOR_MODEL              = "together:Qwen/Qwen3-235B-A22B-Instruct-2507-tput"
+            ADVISOR_MODEL_BASIC        = "${var.advisor_model_basic}"
             REFINE_MODEL               = "together:Qwen/Qwen3-235B-A22B-Instruct-2507-tput"
+            # AI Gateway routing — empty = direct providers; set to flip.
+            AI_GATEWAY_BASE_URL        = "${var.ai_gateway_base_url}"
+            # Cache-key suffix. Bump via tfvars to force-invalidate all cached
+            # LLM responses after a prompt change. Deploy pipeline can
+            # derive this from the git SHA + prompts hash.
+            AI_GATEWAY_CACHE_VERSION   = "${var.ai_gateway_cache_version}"
             SUBPRIME_DATA_DIR          = "/app/state/data"
             SUBPRIME_CONVERSATIONS_DIR = "/app/state/conversations"
             DATABASE_URL               = "postgresql://finadvisor:${var.postgres_password}@localhost:${local.ports.postgresql}/finadvisor"

@@ -154,3 +154,30 @@ variable "ses_aws_secret_access_key" {
   default     = ""
   description = "Secret for ses_aws_access_key_id."
 }
+
+# ── AI Gateway + Workers AI ──────────────────────────────────────────────────
+
+variable "ai_gateway_base_url" {
+  type        = string
+  default     = ""
+  description = "Cloudflare AI Gateway base URL, e.g. 'https://gateway.ai.cloudflare.com/v1/<acct>/<gw>'. Empty → providers hit direct."
+}
+
+variable "ai_gateway_cache_version" {
+  type        = string
+  default     = ""
+  description = "Suffix appended to AI Gateway's cache key. Bump to force cache invalidation after a prompt change."
+}
+
+variable "cloudflare_api_token" {
+  type        = string
+  sensitive   = true
+  default     = ""
+  description = "Cloudflare token with Workers AI read access. Used as the Authorization header for workers-ai:* models routed through AI Gateway."
+}
+
+variable "advisor_model_basic" {
+  type        = string
+  default     = ""
+  description = "Basic-tier advisor model override. Empty → basic tier uses ADVISOR_MODEL. Intended for a small Workers AI model (e.g. 'workers-ai:@cf/meta/llama-3.3-70b-instruct-fp8-fast')."
+}
