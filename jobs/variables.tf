@@ -193,3 +193,17 @@ variable "refine_model" {
   default     = "none"
   description = "Senior-reviewer model for the refine pass. 'none' skips refinement. Set to a workers-ai or anthropic model to enable."
 }
+
+variable "gemini_api_key" {
+  type        = string
+  sensitive   = true
+  default     = ""
+  description = "Google AI Studio API key for Gemini models routed through AI Gateway."
+}
+
+variable "groq_api_key" {
+  type        = string
+  sensitive   = true
+  default     = ""
+  description = "Groq API key. Routed through AI Gateway's groq/openai/v1 endpoint."
+}

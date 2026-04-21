@@ -90,6 +90,8 @@ locals {
             ANTHROPIC_API_KEY          = "${var.finadvisor_anthropic_api_key}"
             TOGETHER_API_KEY           = "${var.together_api_key}"
             CLOUDFLARE_API_TOKEN       = "${var.cloudflare_api_token}"
+            GEMINI_API_KEY             = "${var.gemini_api_key}"
+            GROQ_API_KEY               = "${var.groq_api_key}"
             ADVISOR_MODEL              = "${var.advisor_model}"
             ADVISOR_MODEL_BASIC        = "${var.advisor_model_basic}"
             REFINE_MODEL               = "${var.refine_model}"
