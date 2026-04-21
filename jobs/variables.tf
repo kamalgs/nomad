@@ -109,3 +109,20 @@ variable "hyperdx_ingest_token" {
   default     = ""
   description = "Bearer token for HyperDX's OTLP collector. Read from /etc/otel/supervisor-data/effective.yaml inside the hyperdx container, or copy from HyperDX UI → Team Settings → Ingestion API Key."
 }
+
+# ── Blue-green deployment ─────────────────────────────────────────────────────
+# The deploy script targets one colour at a time by setting this variable,
+# terraform-applying just the corresponding `nomad_job.finadvisor_<colour>`,
+# smoke-testing the inactive colour, then flipping Caddy's active pointer.
+
+variable "finadvisor_blue_image" {
+  type        = string
+  default     = "finadvisor:local"
+  description = "Docker image for the blue finadvisor job. Deploy script may override via -var or TF_VAR_finadvisor_blue_image."
+}
+
+variable "finadvisor_green_image" {
+  type        = string
+  default     = "finadvisor:local"
+  description = "Docker image for the green finadvisor job."
+}

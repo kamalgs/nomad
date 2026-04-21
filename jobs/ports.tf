@@ -16,7 +16,9 @@ locals {
     llm_gateway   = 8090
     marimo_oauth  = 4181
     marimo        = 8800
-    finadvisor    = 8091
+    finadvisor        = 8091  # legacy — kept as an alias for finadvisor_blue
+    finadvisor_blue   = 8091
+    finadvisor_green  = 8093
     postgresql    = 5432
     mailpit_smtp  = 1025
     mailpit_ui    = 8025

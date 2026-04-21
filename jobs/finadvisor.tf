@@ -1,6 +1,24 @@
-resource "nomad_job" "finadvisor" {
-  jobspec = <<-EOT
-    job "finadvisor" {
+# Blue-green finadvisor deployment.
+#
+#   finadvisor-blue  — port 8091, OTEL service name 'finadvisor-web-blue'
+#   finadvisor-green — port 8093, OTEL service name 'finadvisor-web-green'
+#
+# Both always run count=1. Caddy's `/etc/caddy/active-finadvisor.caddy`
+# include decides which one public traffic hits. Smoke tests address the
+# inactive colour via the `X-Benji-Color: blue|green` header (Caddy
+# matcher).
+#
+# Deploy flow: scripts/blue-green-deploy.sh in the subprime repo.
+
+locals {
+  # Shared job template. `$${color}`, `$${port}`, `$${image}` are kept as
+  # literal `${...}` in the string (HCL `$${…}` → literal `${…}`); the two
+  # resources below swap them per colour with replace().
+  #
+  # The `${var.…}` references ARE interpolated at template-build time, so
+  # they end up with their resolved values in both copies.
+  finadvisor_jobspec = <<-TEMPLATE
+    job "finadvisor-$${color}" {
       datacenters = ["dc1"]
       type        = "service"
 
@@ -17,9 +35,6 @@ resource "nomad_job" "finadvisor" {
           read_only = false
         }
 
-        # Pre-start: apply DuckDB schema migrations while no one else has
-        # the DB open. The service task below uses read-only connections
-        # exclusively, so this is the one chance to write DDL.
         task "migrate" {
           driver = "docker"
           lifecycle {
@@ -27,7 +42,7 @@ resource "nomad_job" "finadvisor" {
             sidecar = false
           }
           config {
-            image        = "finadvisor:local"
+            image        = "$${image}"
             force_pull   = false
             network_mode = "host"
             command      = "subprime"
@@ -50,9 +65,17 @@ resource "nomad_job" "finadvisor" {
           driver = "docker"
 
           config {
-            image        = "finadvisor:local"
+            image        = "$${image}"
             force_pull   = false
             network_mode = "host"
+            command      = "uvicorn"
+            args = [
+              "apps.web.main:create_app",
+              "--factory",
+              "--host", "0.0.0.0",
+              "--port", "$${port}",
+              "--timeout-keep-alive", "5",
+            ]
           }
 
           env {
@@ -69,18 +92,15 @@ resource "nomad_job" "finadvisor" {
             SMTP_PASSWORD              = "${var.smtp_password}"
             SMTP_FROM                  = "${var.smtp_from}"
             SUBPRIME_OTP_CHEAT         = "${var.subprime_otp_cheat}"
-            # OpenTelemetry → HyperDX all-in-one (jobs/hyperdx.tf).
-            # Listens on localhost:4318 (OTLP HTTP) via host networking.
-            # Jaeger (jobs/jaeger.tf) is kept as a count=0 fallback.
-            OTEL_SERVICE_NAME               = "finadvisor-web"
-            OTEL_EXPORTER_OTLP_ENDPOINT     = "http://localhost:${local.ports.otel_http}"
-            OTEL_EXPORTER_OTLP_PROTOCOL     = "http/protobuf"
-            OTEL_EXPORTER_OTLP_HEADERS      = "authorization=${var.hyperdx_ingest_token}"
-            OTEL_METRIC_EXPORT_INTERVAL     = "30000"
-            # Slicing label for Jaeger / Prometheus. Set via terraform.tfvars
-            # to separate prod traffic from experiment runs sharing this app.
-            SUBPRIME_EXPERIMENT             = "${var.subprime_experiment}"
-            SUBPRIME_PROMPT_VERSION         = "${var.subprime_prompt_version}"
+            SUBPRIME_COLOR             = "$${color}"
+            OTEL_SERVICE_NAME           = "finadvisor-web-$${color}"
+            OTEL_EXPORTER_OTLP_ENDPOINT = "http://localhost:${local.ports.otel_http}"
+            OTEL_EXPORTER_OTLP_PROTOCOL = "http/protobuf"
+            OTEL_EXPORTER_OTLP_HEADERS  = "authorization=${var.hyperdx_ingest_token}"
+            OTEL_METRIC_EXPORT_INTERVAL = "30000"
+            OTEL_RESOURCE_ATTRIBUTES    = "subprime.color=$${color}"
+            SUBPRIME_EXPERIMENT         = "${var.subprime_experiment}"
+            SUBPRIME_PROMPT_VERSION     = "${var.subprime_prompt_version}"
           }
 
           volume_mount {
@@ -95,5 +115,19 @@ resource "nomad_job" "finadvisor" {
         }
       }
     }
-  EOT
+  TEMPLATE
+}
+
+resource "nomad_job" "finadvisor_blue" {
+  jobspec = replace(replace(replace(local.finadvisor_jobspec,
+    "$${color}", "blue"),
+    "$${port}", tostring(local.ports.finadvisor_blue)),
+    "$${image}", var.finadvisor_blue_image)
+}
+
+resource "nomad_job" "finadvisor_green" {
+  jobspec = replace(replace(replace(local.finadvisor_jobspec,
+    "$${color}", "green"),
+    "$${port}", tostring(local.ports.finadvisor_green)),
+    "$${image}", var.finadvisor_green_image)
 }
