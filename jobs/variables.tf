@@ -126,3 +126,31 @@ variable "finadvisor_green_image" {
   default     = "finadvisor:local"
   description = "Docker image for the green finadvisor job."
 }
+
+# ── SES (for OTP email; SMTP mailpit is the dev fallback) ────────────────────
+
+variable "ses_from_address" {
+  type        = string
+  default     = ""
+  description = "SES sender, e.g. 'Benji <noreply@finadvisor.gkamal.online>'. Empty = use SMTP fallback."
+}
+
+variable "ses_region" {
+  type        = string
+  default     = "us-east-1"
+  description = "AWS region for SES (must match where the sender is verified)."
+}
+
+variable "ses_aws_access_key_id" {
+  type        = string
+  sensitive   = true
+  default     = ""
+  description = "IAM access key restricted to ses:SendEmail on the verified sender."
+}
+
+variable "ses_aws_secret_access_key" {
+  type        = string
+  sensitive   = true
+  default     = ""
+  description = "Secret for ses_aws_access_key_id."
+}

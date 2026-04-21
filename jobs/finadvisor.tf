@@ -99,6 +99,11 @@ locals {
             SMTP_USER                  = "${var.smtp_user}"
             SMTP_PASSWORD              = "${var.smtp_password}"
             SMTP_FROM                  = "${var.smtp_from}"
+            # SES (preferred when configured). Empty → app falls back to SMTP.
+            SES_FROM_ADDRESS           = "${var.ses_from_address}"
+            SES_REGION                 = "${var.ses_region}"
+            AWS_ACCESS_KEY_ID          = "${var.ses_aws_access_key_id}"
+            AWS_SECRET_ACCESS_KEY      = "${var.ses_aws_secret_access_key}"
             SUBPRIME_OTP_CHEAT         = "${var.subprime_otp_cheat}"
             SUBPRIME_COLOR             = "$${color}"
             OTEL_SERVICE_NAME           = "finadvisor-web-$${color}"
