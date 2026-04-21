@@ -37,6 +37,11 @@ locals {
 
         task "migrate" {
           driver = "docker"
+          # Prestart needs write access to the host-mounted volume
+          # (owned by host uid). Run as root, then chown the state dir
+          # to uid 1001 so the runtime task (USER benji = 1001) can
+          # use it. The runtime task keeps the image's non-root USER.
+          user = "root"
           lifecycle {
             hook    = "prestart"
             sidecar = false
@@ -45,8 +50,11 @@ locals {
             image        = "$${image}"
             force_pull   = false
             network_mode = "host"
-            command      = "subprime"
-            args         = ["data", "migrate"]
+            command      = "sh"
+            args = [
+              "-c",
+              "subprime data migrate && chown -R 1001:1001 /app/state",
+            ]
           }
           env {
             SUBPRIME_DATA_DIR = "/app/state/data"
