@@ -53,6 +53,12 @@ variable "together_api_key" {
   sensitive = true
 }
 
+variable "openrouter_api_key" {
+  type      = string
+  sensitive = true
+  default   = ""
+}
+
 variable "postgres_password" {
   type      = string
   sensitive = true
