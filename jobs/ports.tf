@@ -16,6 +16,8 @@ locals {
     llm_gateway   = 8090
     marimo_oauth  = 4181
     marimo        = 8800
+    admin_oauth   = 4182
+    metabase      = 3030
     finadvisor        = 8091  # legacy — kept as an alias for finadvisor_blue
     finadvisor_blue   = 8091
     finadvisor_green  = 8093

@@ -38,6 +38,30 @@ variable "marimo_oauth_client_secret" {
   sensitive = true
 }
 
+# ── Admin console (Metabase) ─────────────────────────────────────────────────
+# GitHub OAuth app dedicated to admin.finadvisor.gkamal.online — authorised
+# callback URL: https://admin.finadvisor.gkamal.online/oauth2/callback
+variable "admin_oauth_client_id" {
+  type      = string
+  sensitive = true
+}
+
+variable "admin_oauth_client_secret" {
+  type      = string
+  sensitive = true
+}
+
+variable "admin_oauth_cookie_secret" {
+  type      = string
+  sensitive = true
+}
+
+variable "metabase_ro_password" {
+  type        = string
+  sensitive   = true
+  description = "Password for the metabase_ro Postgres role (SELECT-only on a curated subset)."
+}
+
 variable "openwebui_secret_key" {
   type      = string
   sensitive = true
@@ -51,6 +75,12 @@ variable "finadvisor_anthropic_api_key" {
 variable "together_api_key" {
   type      = string
   sensitive = true
+}
+
+variable "openrouter_api_key" {
+  type      = string
+  sensitive = true
+  default   = ""
 }
 
 variable "postgres_password" {

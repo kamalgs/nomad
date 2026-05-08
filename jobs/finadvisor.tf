@@ -89,6 +89,7 @@ locals {
           env {
             ANTHROPIC_API_KEY          = "${var.finadvisor_anthropic_api_key}"
             TOGETHER_API_KEY           = "${var.together_api_key}"
+            OPENROUTER_API_KEY         = "${var.openrouter_api_key}"
             CLOUDFLARE_API_TOKEN       = "${var.cloudflare_api_token}"
             ADVISOR_MODEL              = "${var.advisor_model}"
             ADVISOR_MODEL_BASIC        = "${var.advisor_model_basic}"
