@@ -21,7 +21,7 @@ resource "nomad_job" "pi_dashboard" {
               "--import",
               "file:///home/agent/.local/share/mise/installs/node/22.22.0/lib/node_modules/@mariozechner/pi-coding-agent/node_modules/@mariozechner/jiti/lib/jiti-register.mjs",
               "${var.pi_dashboard_repo}/packages/server/src/cli.ts",
-              "start",
+              "--port", "${local.ports.pi_dashboard}",
             ]
           }
 
