@@ -47,7 +47,7 @@ resource "terraform_data" "caddyfile_apply" {
       # it at, so we use the rendered (not live) version. Any imports it
       # references (e.g. /etc/caddy/active-finadvisor.caddy) must already
       # exist for validate to pass — which they will in normal operation.
-      sudo caddy validate --config "$RENDERED" --adapter caddyfile
+      sudo --preserve-env=CF_API_TOKEN caddy validate --config "$RENDERED" --adapter caddyfile
 
       # Swap with backup. Atomic via mv on the same filesystem.
       sudo cp "$LIVE" "$BACKUP"

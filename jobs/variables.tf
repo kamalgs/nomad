@@ -56,6 +56,30 @@ variable "admin_oauth_cookie_secret" {
   sensitive = true
 }
 
+# ── pi-agent-dashboard ───────────────────────────────────────────────────────
+# GitHub OAuth app dedicated to pi.gkamal.online — authorised callback URL:
+# https://pi.gkamal.online/oauth2/callback
+variable "pi_oauth_client_id" {
+  type      = string
+  sensitive = true
+}
+
+variable "pi_oauth_client_secret" {
+  type      = string
+  sensitive = true
+}
+
+variable "pi_oauth_cookie_secret" {
+  type      = string
+  sensitive = true
+}
+
+variable "pi_dashboard_repo" {
+  type        = string
+  default     = "/home/agent/projects/phi-dev-setup/pi-agent-dashboard"
+  description = "Absolute path to the pi-agent-dashboard checkout the raw_exec task runs from."
+}
+
 variable "metabase_ro_password" {
   type        = string
   sensitive   = true
@@ -78,6 +102,23 @@ variable "together_api_key" {
 }
 
 variable "openrouter_api_key" {
+  type      = string
+  sensitive = true
+  default   = ""
+}
+
+variable "resend_api_key" {
+  type      = string
+  sensitive = true
+  default   = ""
+}
+
+variable "resend_from" {
+  type    = string
+  default = "Benji <noreply@finadvisor.gkamal.online>"
+}
+
+variable "subprime_admin_token" {
   type      = string
   sensitive = true
   default   = ""

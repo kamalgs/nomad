@@ -31,6 +31,12 @@ jupyter.gkamal.online {
     reverse_proxy 127.0.0.1:4180
 }
 
+pi.gkamal.online {
+    encode zstd gzip
+    # routes through oauth2-proxy (GitHub) → pi-agent-dashboard
+    reverse_proxy 127.0.0.1:4183
+}
+
 foliozzz.gkamal.online {
     encode zstd gzip
     reverse_proxy localhost:8085

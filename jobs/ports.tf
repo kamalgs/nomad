@@ -17,6 +17,9 @@ locals {
     marimo_oauth  = 4181
     marimo        = 8800
     admin_oauth   = 4182
+    pi_dashboard_oauth = 4183
+    pi_dashboard        = 8092
+    pi_dashboard_bridge = 9999  # extension↔server WS, internal only
     metabase      = 3030
     finadvisor        = 8091  # legacy — kept as an alias for finadvisor_blue
     finadvisor_blue   = 8091
