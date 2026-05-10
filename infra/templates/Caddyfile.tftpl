@@ -1,0 +1,102 @@
+{
+    acme_dns cloudflare {env.CF_API_TOKEN}
+}
+
+# The Caddyfile is an easy way to configure your Caddy web server.
+#
+# Unless the file starts with a global options block, the first
+# uncommented line is always the address of your site.
+#
+# To use your own domain name (with automatic HTTPS), first make
+# sure your domain's A/AAAA DNS records are properly pointed to
+# this machine's public IP, then replace ":80" below with your
+# domain name.
+
+dev.gkamal.online {
+    reverse_proxy localhost:3000
+}
+
+
+o3000ly.gkamal.online {
+    reverse_proxy localhost:8080
+}
+
+
+alphaa.gkamal.online {
+    reverse_proxy 127.0.0.1:8000
+}
+
+jupyter.gkamal.online {
+    encode zstd gzip
+    reverse_proxy 127.0.0.1:4180
+}
+
+foliozzz.gkamal.online {
+    encode zstd gzip
+    reverse_proxy localhost:8085
+}
+
+finadvisor.gkamal.online {
+    encode zstd gzip
+
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+        X-Content-Type-Options "nosniff"
+        Referrer-Policy "strict-origin-when-cross-origin"
+        Permissions-Policy "geolocation=(), microphone=(), camera=(), payment=()"
+    }
+
+    handle /.well-known/security.txt {
+        header Content-Type "text/plain"
+        root * /var/www/well-known
+        rewrite * /security.txt
+        file_server
+    }
+
+    # Smoke / canary tests: X-Benji-Color header forces the target colour.
+    @color_blue  header X-Benji-Color blue
+    @color_green header X-Benji-Color green
+    handle @color_blue {
+        reverse_proxy localhost:8091
+    }
+    handle @color_green {
+        reverse_proxy localhost:8093
+    }
+
+    # Everyone else → the active colour. File rewritten by the
+    # blue-green-deploy.sh / rollback.sh scripts; Caddy reloads on change.
+    import /etc/caddy/active-finadvisor.caddy
+}
+
+# Refer to the Caddy docs for more information:
+# https://caddyserver.com/docs/caddyfile
+
+
+mailpit.gkamal.online {
+    encode zstd gzip
+    reverse_proxy 127.0.0.1:8025
+}
+
+hyperdx.gkamal.online {
+    encode zstd gzip
+    reverse_proxy localhost:8080
+}
+
+admin.finadvisor.gkamal.online {
+    encode zstd gzip
+
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+        X-Content-Type-Options "nosniff"
+        Referrer-Policy "strict-origin-when-cross-origin"
+        Permissions-Policy "geolocation=(), microphone=(), camera=(), payment=()"
+        X-Frame-Options "DENY"
+        Content-Security-Policy "frame-ancestors 'none'"
+    }
+
+    reverse_proxy 127.0.0.1:4182
+}
+
+gkamal.online {
+    redir https://finadvisor.gkamal.online{uri} 301
+}
