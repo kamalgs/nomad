@@ -15,82 +15,12 @@ resource "terraform_data" "nomad_install" {
       unzip -o "$tmp/nomad.zip" -d "${var.install_dir}"
       chmod +x "${var.install_dir}/nomad"
       rm -rf "$tmp"
-      mkdir -p "${var.data_dir}" "${var.config_dir}" "/opt/nomad/volumes/caddy_data" "/opt/nomad/volumes/jupyter_data" "/opt/nomad/volumes/marimo_data" "/opt/nomad/volumes/o3000y_data" "/opt/nomad/volumes/hyperdx_data" "/opt/nomad/volumes/hyperdx_mongo" "/opt/nomad/volumes/foliozzz_data" "/opt/nomad/volumes/finadvisor_data" "/opt/nomad/caddy/apps" "/opt/nomad/launcher"
+      mkdir -p "${var.data_dir}" "${var.config_dir}" "/opt/nomad/volumes/caddy_data" "/opt/nomad/volumes/jupyter_data" "/opt/nomad/volumes/marimo_data" "/opt/nomad/volumes/o3000y_data" "/opt/nomad/volumes/hyperdx_data" "/opt/nomad/volumes/hyperdx_mongo" "/opt/nomad/volumes/foliozzz_data" "/opt/nomad/volumes/finadvisor_data" "/opt/nomad/launcher"
 
-      # Seed initial Caddy route snippets (port assignments in PORTS.md)
-      cat > /opt/nomad/caddy/apps/o3000y.caddy << 'CADDY'
-o3000y.gkamal.online {
-    encode zstd gzip
-    reverse_proxy {
-        to localhost:8081 localhost:9090
-        lb_policy first
-        lb_retries 1
-        fail_duration 10s
-    }
-}
-CADDY
-
-      cat > /opt/nomad/caddy/apps/alphaa.caddy << 'CADDY'
-alphaa.gkamal.online {
-    encode zstd gzip
-    reverse_proxy {
-        to localhost:8000 localhost:9090
-        lb_policy first
-        lb_retries 1
-        fail_duration 10s
-    }
-}
-CADDY
-
-      cat > /opt/nomad/caddy/apps/hyperdx.caddy << 'CADDY'
-hyperdx.gkamal.online {
-    encode zstd gzip
-    reverse_proxy localhost:8080
-}
-CADDY
-
-      cat > /opt/nomad/caddy/apps/jupyter.caddy << 'CADDY'
-jupyter.gkamal.online {
-    encode zstd gzip
-    reverse_proxy {
-        to 127.0.0.1:4180 localhost:9090
-        lb_policy first
-        lb_retries 1
-        fail_duration 10s
-    }
-}
-CADDY
-
-      cat > /opt/nomad/caddy/apps/marimo.caddy << 'CADDY'
-marimo.gkamal.online {
-    encode zstd gzip
-    reverse_proxy {
-        to 127.0.0.1:4181 localhost:9090
-        lb_policy first
-        lb_retries 1
-        fail_duration 10s
-    }
-}
-CADDY
-
-      cat > /opt/nomad/caddy/apps/foliozzz.caddy << 'CADDY'
-foliozzz.gkamal.online {
-    encode zstd gzip
-    reverse_proxy localhost:8085
-}
-CADDY
-
-      cat > /opt/nomad/caddy/apps/finadvisor.caddy << 'CADDY'
-finadvisor.gkamal.online {
-    encode zstd gzip
-    reverse_proxy {
-        to localhost:8091 localhost:9090
-        lb_policy first
-        lb_retries 1
-        fail_duration 10s
-    }
-}
-CADDY
+      # Per-app Caddy snippets used to be seeded under /opt/nomad/caddy/apps/
+      # for an old Nomad-managed gateway job. That job is gone; Caddy now
+      # runs as a systemd service with /etc/caddy/Caddyfile under VC at
+      # infra/caddy.tf. The leftover /opt/nomad/caddy/ files are stale.
 
       # Seed launcher apps config with on-demand apps
       test -f /opt/nomad/launcher/apps.json || cat > /opt/nomad/launcher/apps.json << 'JSON'
