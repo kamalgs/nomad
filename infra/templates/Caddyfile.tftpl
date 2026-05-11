@@ -106,3 +106,8 @@ admin.finadvisor.gkamal.online {
 gkamal.online {
     redir https://finadvisor.gkamal.online{uri} 301
 }
+
+aporia.gkamal.online {
+    encode zstd gzip
+    reverse_proxy localhost:8094
+}

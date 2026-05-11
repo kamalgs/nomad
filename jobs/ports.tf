@@ -33,5 +33,6 @@ locals {
     jaeger_ui     = 16686
     # HyperDX internal (deprecated; job scaled to zero)
     # hdx_metrics = 8888
+    aporia = 8094
   }
 }

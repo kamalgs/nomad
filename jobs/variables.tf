@@ -264,3 +264,18 @@ variable "refine_model" {
   default     = "none"
   description = "Senior-reviewer model for the refine pass. 'none' skips refinement. Set to a workers-ai or anthropic model to enable."
 }
+
+# ── Aporia (Socratic Arithmetic Tutor) ────────────────────────────────────────
+
+variable "fireworks_api_key" {
+  type        = string
+  sensitive   = true
+  default     = ""
+  description = "Fireworks AI API key for the Socratic tutor."
+}
+
+variable "aporia_model" {
+  type        = string
+  default     = "accounts/fireworks/models/llama-v3p1-405b-instruct"
+  description = "Frontier-class model on Fireworks AI for the tutor. Defaults to Llama 3.1 405B."
+}
